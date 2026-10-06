@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nyamira Serve — Your County, At Your Fingertips</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #1a6b3c;
+  --green-dark: #0f4a28;
+  --green-light: #e8f5ee;
+  --gold: #c9920a;
+  --gold-light: #fdf6e3;
+  --white: #ffffff;
+  --bg: #f6f8f5;
+  --surface: #ffffff;
+  --border: #e2ece6;
+  --text: #1a2e1f;
+  --text-muted: #5a7063;
+  --text-light: #8fa898;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(26,107,60,0.08);
+  --shadow-md: 0 8px 32px rgba(26,107,60,0.12);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+a { text-decoration: none; color: inherit; }
+button { font-family: 'Sora', sans-serif; cursor: pointer; }
+
+/* ── Layout ── */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar { width: 260px; background: var(--green-dark); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; transition: transform 0.3s; }
+.main { margin-left: 260px; flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+/* ── Sidebar ── */
+.sidebar-logo { padding: 28px 24px 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.logo-mark { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+.logo-circle { width: 42px; height: 42px; background: var(--gold); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'Instrument Serif', serif; font-size: 20px; color: #3a2600; font-weight: 400; flex-shrink: 0; }
+.logo-name { font-size: 17px; font-weight: 600; color: #fff; letter-spacing: -0.3px; }
+.logo-tagline { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 300; padding-left: 54px; }
+.sidebar-nav { padding: 16px 12px; flex: 1; overflow-y: auto; }
+.nav-section-label { font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.3); letter-spacing: 1px; text-transform: uppercase; padding: 12px 12px 6px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--radius-sm); color: rgba(255,255,255,0.65); font-size: 13.5px; font-weight: 400; cursor: pointer; transition: all 0.15s; margin-bottom: 2px; }
+.nav-item:hover { background: rgba(255,255,255,0.07); color: white; }
+.nav-item.active { background: var(--green); color: white; font-weight: 500; }
+.nav-item .nav-icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+.nav-badge { margin-left: auto; background: var(--gold); color: #3a2600; font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+.sidebar-footer { padding: 16px 24px; border-top: 1px solid rgba(255,255,255,0.08); }
+.lang-toggle-wrap { display: flex; background: rgba(255,255,255,0.08); border-radius: var(--radius-sm); padding: 3px; gap: 3px; }
+.lang-btn { flex: 1; text-align: center; padding: 6px; font-size: 12px; border: none; border-radius: 6px; background: transparent; color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.15s; }
+.lang-btn.active { background: var(--gold); color: #3a2600; font-weight: 500; }
+
+/* ── Top bar ── */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 32px; height: 64px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.page-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.breadcrumb { font-size: 13px; color: var(--text-muted); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+.search-box { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 8px 16px; font-size: 13px; color: var(--text-muted); cursor: pointer; transition: all 0.15s; min-width: 220px; }
+.search-box:hover { border-color: var(--green); }
+.search-box input { background: none; border: none; outline: none; font-family: 'Sora', sans-serif; font-size: 13px; color: var(--text); flex: 1; }
+.topbar-icon-btn { width: 38px; height: 38px; border-radius: 50%; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: all 0.15s; }
+.topbar-icon-btn:hover { border-color: var(--green); background: var(--green-light); }
+.user-chip { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 6px 14px 6px 6px; cursor: pointer; }
+.user-avatar { width: 26px; height: 26px; border-radius: 50%; background: var(--green); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: white; }
+.user-name { font-size: 13px; font-weight: 500; }
+
+/* ── Page content ── */
+.page-content { padding: 32px; flex: 1; }
+.page-section { display: none; }
+.page-section.active { display: block; }
+
+/* ── Hero ── */
+.hero { background: linear-gradient(135deg, var(--green-dark) 0%, var(--green) 100%); border-radius: var(--radius); padding: 40px 40px 32px; color: white; margin-bottom: 28px; position: relative; overflow: hidden; }
+.hero::before { content: ''; position: absolute; right: -40px; top: -40px; width: 280px; height: 280px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+.hero::after { content: ''; position: absolute; right: 40px; bottom: -60px; width: 160px; height: 160px; background: rgba(255,255,255,0.04); border-radius: 50%; }
+.hero-label { font-size: 11px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--gold); margin-bottom: 10px; }
+.hero h1 { font-family: 'Instrument Serif', serif; font-size: 34px; font-weight: 400; line-height: 1.2; margin-bottom: 10px; }
+.hero h1 em { font-style: italic; color: #ffd97a; }
+.hero p { font-size: 14px; color: rgba(255,255,255,0.75); max-width: 420px; line-height: 1.6; margin-bottom: 24px; }
+.hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+.btn-primary { background: var(--gold); color: #3a2600; font-size: 13.5px; font-weight: 600; padding: 10px 22px; border-radius: 24px; border: none; cursor: pointer; transition: all 0.15s; }
+.btn-primary:hover { background: #e0a50b; transform: translateY(-1px); }
+.btn-outline-white { background: rgba(255,255,255,0.12); color: white; font-size: 13.5px; font-weight: 500; padding: 10px 22px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.25); cursor: pointer; transition: all 0.15s; }
+.btn-outline-white:hover { background: rgba(255,255,255,0.2); }
+.hero-stats { display: flex; gap: 32px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 24px; margin-top: 4px; flex-wrap: wrap; }
+.hero-stat { }
+.hero-stat .num { font-size: 26px; font-weight: 600; line-height: 1; }
+.hero-stat .lbl { font-size: 11px; color: rgba(255,255,255,0.6); margin-top: 3px; }
+
+/* ── Section titles ── */
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.section-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.section-link { font-size: 13px; color: var(--green); font-weight: 500; cursor: pointer; }
+.section-link:hover { text-decoration: underline; }
+
+/* ── Stat cards ── */
+.stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 28px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; }
+.stat-card .s-num { font-size: 28px; font-weight: 600; color: var(--green); }
+.stat-card .s-label { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+.stat-card .s-icon { font-size: 22px; margin-bottom: 8px; }
+
+/* ── Department grid ── */
+.dept-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+.dept-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 16px; cursor: pointer; transition: all 0.18s; text-align: center; }
+.dept-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--green); }
+.dept-emoji { font-size: 28px; margin-bottom: 10px; }
+.dept-name { font-size: 13px; font-weight: 500; color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+.dept-count { font-size: 11px; color: var(--text-muted); }
+
+/* ── Quick services ── */
+.quick-services { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 28px; }
+.service-chip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.15s; }
+.service-chip:hover { border-color: var(--green); background: var(--green-light); }
+.chip-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.chip-info { flex: 1; }
+.chip-name { font-size: 13.5px; font-weight: 500; color: var(--text); }
+.chip-dept { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.chip-badge { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; }
+.badge-green { background: var(--green-light); color: var(--green); }
+.badge-gold { background: var(--gold-light); color: var(--gold); }
+.badge-blue { background: #e8f2fc; color: #185fa5; }
+
+/* ── Department detail page ── */
+.dept-detail-header { display: flex; align-items: center; gap: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px; }
+.dept-detail-icon { width: 56px; height: 56px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 28px; flex-shrink: 0; }
+.dept-detail-title { font-size: 20px; font-weight: 600; }
+.dept-detail-sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.back-btn { display: flex; align-items: center; gap: 6px; background: var(--bg); border: 1px solid var(--border); border-radius: 24px; padding: 8px 16px; font-size: 13px; font-weight: 500; color: var(--text-muted); cursor: pointer; transition: all 0.15s; margin-bottom: 20px; }
+.back-btn:hover { border-color: var(--green); color: var(--green); }
+.services-table { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.service-row { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.12s; }
+.service-row:last-child { border-bottom: none; }
+.service-row:hover { background: var(--green-light); }
+.service-row-icon { width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.service-row-info { flex: 1; }
+.service-row-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.service-row-desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.service-row-fee { font-size: 12px; color: var(--green); font-weight: 500; margin-top: 3px; }
+.service-row-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.online-pill { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; background: var(--green-light); color: var(--green); }
+.offline-pill { font-size: 11px; font-weight: 500; padding: 4px 10px; border-radius: 20px; background: #fef3e2; color: #b45309; }
+.apply-row-btn { background: var(--green); color: white; font-size: 12px; font-weight: 500; padding: 7px 16px; border-radius: 20px; border: none; cursor: pointer; transition: background 0.15s; }
+.apply-row-btn:hover { background: var(--green-dark); }
+
+/* ── Tracker ── */
+.tracker-grid { display: flex; flex-direction: column; gap: 16px; }
+.track-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 22px; }
+.track-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 16px; }
+.track-id { font-size: 12px; font-weight: 600; color: var(--green); letter-spacing: 0.5px; }
+.track-name { font-size: 15px; font-weight: 500; color: var(--text); margin-top: 3px; }
+.track-dept { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.status-pill { font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; }
+.status-review { background: #fef3e2; color: #b45309; }
+.status-approved { background: var(--green-light); color: var(--green); }
+.status-processing { background: #e8f2fc; color: #185fa5; }
+.progress-wrap { margin-top: 4px; }
+.progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+.progress-fill { height: 100%; background: var(--green); border-radius: 3px; transition: width 0.6s ease; }
+.progress-steps { display: flex; justify-content: space-between; }
+.progress-step { font-size: 11px; color: var(--text-light); }
+.progress-step.done { color: var(--green); font-weight: 500; }
+
+/* ── Payments ── */
+.pay-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.pay-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+.pay-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.pay-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+.paybill-box { background: var(--green-dark); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
+.paybill-label { font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 4px; }
+.paybill-number { font-size: 26px; font-weight: 600; color: var(--gold); letter-spacing: 2px; }
+.pay-steps { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.pay-step { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+.step-num { width: 20px; height: 20px; background: var(--green-light); color: var(--green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
+.fee-table { width: 100%; border-collapse: collapse; }
+.fee-table th { text-align: left; font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; padding: 0 0 12px; border-bottom: 1px solid var(--border); }
+.fee-table td { padding: 12px 0; font-size: 13px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.fee-table tr:last-child td { border-bottom: none; }
+.fee-amount { font-weight: 500; color: var(--green); }
+
+/* ── Info / About ── */
+.info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.info-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; }
+.info-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 16px; }
+.info-row { display: flex; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+.info-row:last-child { border-bottom: none; }
+.info-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.info-label { color: var(--text-muted); flex-shrink: 0; min-width: 110px; }
+.info-value { color: var(--text); font-weight: 500; }
+.contact-btn { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 16px; margin-top: 10px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.15s; }
+.contact-btn:hover { border-color: var(--green); background: var(--green-light); }
+.emergency-banner { background: #fef2f2; border: 1px solid #fca5a5; border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 10px; }
+.emergency-banner strong { color: #991b1b; font-size: 13px; }
+.emergency-banner p { color: #7f1d1d; font-size: 12px; margin-top: 4px; }
+
+/* ── Apply modal overlay ── */
+.modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 200; align-items: center; justify-content: center; }
+.modal-backdrop.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius); padding: 32px; width: 100%; max-width: 520px; box-shadow: var(--shadow-md); max-height: 90vh; overflow-y: auto; }
+.modal h2 { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+.modal .modal-dept { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
+.form-group { margin-bottom: 18px; }
+.form-label { font-size: 12px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+.form-input { width: 100%; padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-family: 'Sora', sans-serif; font-size: 13.5px; color: var(--text); background: var(--bg); outline: none; transition: border 0.15s; }
+.form-input:focus { border-color: var(--green); background: white; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.modal-footer { display: flex; gap: 12px; margin-top: 24px; justify-content: flex-end; }
+.btn-cancel { background: var(--bg); border: 1px solid var(--border); color: var(--text-muted); font-size: 13.5px; font-weight: 500; padding: 10px 22px; border-radius: 24px; cursor: pointer; }
+.btn-submit { background: var(--green); color: white; font-size: 13.5px; font-weight: 600; padding: 10px 28px; border-radius: 24px; border: none; cursor: pointer; transition: background 0.15s; }
+.btn-submit:hover { background: var(--green-dark); }
+.success-msg { display: none; text-align: center; padding: 20px; }
+.success-msg .check { font-size: 48px; margin-bottom: 12px; }
+.success-msg h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+.success-msg p { font-size: 13px; color: var(--text-muted); }
+.ref-box { background: var(--green-light); border-radius: var(--radius-sm); padding: 12px; margin: 16px 0; font-size: 15px; font-weight: 600; color: var(--green); }
+
+/* ── Mobile nav ── */
+.mobile-topbar { display: none; background: var(--green-dark); padding: 14px 16px; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.hamburger { background: none; border: none; font-size: 22px; color: white; cursor: pointer; }
+.mobile-logo { font-size: 15px; font-weight: 600; color: white; }
+.mobile-nav-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 150; }
+.mobile-nav-overlay.open { display: block; }
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-260px); }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .mobile-topbar { display: flex; }
+  .topbar { display: none; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .dept-grid { grid-template-columns: repeat(3, 1fr); }
+  .quick-services { grid-template-columns: 1fr; }
+  .pay-grid { grid-template-columns: 1fr; }
+  .info-grid { grid-template-columns: 1fr; }
+  .page-content { padding: 16px; }
+  .hero { padding: 24px 22px 20px; }
+  .hero h1 { font-size: 24px; }
+}
+@media (max-width: 600px) {
+  .dept-grid { grid-template-columns: repeat(3, 1fr); }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .form-row { grid-template-columns: 1fr; }
+  .hero-stats { gap: 20px; }
+}
+
+/* ── Animations ── */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.page-section.active { animation: fadeUp 0.25s ease; }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div class="logo-circle">N</div>
+        <div>
+          <div class="logo-name">Nyamira Serve</div>
+        </div>
+      </div>
+      <div class="logo-tagline">Your County, At Your Fingertips</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Main</div>
+      <div class="nav-item active" onclick="showPage('home')"><span class="nav-icon">🏠</span> Home</div>
+      <div class="nav-item" onclick="showPage('services')"><span class="nav-icon">📋</span> All Services <span class="nav-badge">60+</span></div>
+      <div class="nav-item" onclick="showPage('track')"><span class="nav-icon">📊</span> Track Application</div>
+      <div class="nav-item" onclick="showPage('pay')"><span class="nav-icon">💳</span> Pay Fees</div>
+
+      <div class="nav-section-label" style="margin-top:8px;">Departments</div>
+      <div class="nav-item" onclick="showDept('health')"><span class="nav-icon">🏥</span> Health</div>
+      <div class="nav-item" onclick="showDept('trade')"><span class="nav-icon">🏪</span> Trade & Business</div>
+      <div class="nav-item" onclick="showDept('agriculture')"><span class="nav-icon">🌿</span> Agriculture</div>
+      <div class="nav-item" onclick="showDept('lands')"><span class="nav-icon">🗺️</span> Lands & Planning</div>
+      <div class="nav-item" onclick="showDept('education')"><span class="nav-icon">📚</span> Education</div>
+      <div class="nav-item" onclick="showDept('social')"><span class="nav-icon">🤝</span> Social Services</div>
+      <div class="nav-item" onclick="showDept('water')"><span class="nav-icon">💧</span> Water & Environment</div>
+      <div class="nav-item" onclick="showDept('finance')"><span class="nav-icon">💰</span> Finance & Revenue</div>
+      <div class="nav-item" onclick="showDept('roads')"><span class="nav-icon">🛣️</span> Roads & Infrastructure</div>
+      <div class="nav-item" onclick="showDept('ict')"><span class="nav-icon">💻</span> ICT Services</div>
+      <div class="nav-item" onclick="showDept('culture')"><span class="nav-icon">🏆</span> Culture & Sports</div>
+      <div class="nav-item" onclick="showDept('admin')"><span class="nav-icon">🏛️</span> Administration</div>
+
+      <div class="nav-section-label" style="margin-top:8px;">County Info</div>
+      <div class="nav-item" onclick="showPage('info')"><span class="nav-icon">ℹ️</span> About Nyamira</div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="lang-toggle-wrap">
+        <button class="lang-btn active" onclick="setLang('en', this)">English</button>
+        <button class="lang-btn" onclick="setLang('sw', this)">Kiswahili</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Mobile overlay -->
+  <div class="mobile-nav-overlay" id="mobileOverlay" onclick="closeSidebar()"></div>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Mobile top bar -->
+    <div class="mobile-topbar">
+      <button class="hamburger" onclick="toggleSidebar()">☰</button>
+      <div class="mobile-logo">Nyamira Serve</div>
+      <div style="width:32px;"></div>
+    </div>
+
+    <!-- Desktop top bar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="page-title" id="topbarTitle">Home</div>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <span>🔍</span>
+          <input type="text" placeholder="Search services..." oninput="handleSearch(this.value)" id="searchInput">
+        </div>
+        <div class="topbar-icon-btn" title="Notifications">🔔</div>
+        <div class="user-chip">
+          <div class="user-avatar">R</div>
+          <div class="user-name">Resident</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page content -->
+    <div class="page-content">
+
+      <!-- HOME -->
+      <div class="page-section active" id="page-home">
+        <div class="hero">
+          <div class="hero-label">Nyamira County Government</div>
+          <h1>Public Services,<br><em>Built for you.</em></h1>
+          <p>Access health, business permits, land services, education bursaries, payments and more — all in one place.</p>
+          <div class="hero-actions">
+            <button class="btn-primary" onclick="showPage('services')">Browse All Services</button>
+            <button class="btn-outline-white" onclick="showPage('track')">Track My Application</button>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat"><div class="num">60+</div><div class="lbl">Services</div></div>
+            <div class="hero-stat"><div class="num">12</div><div class="lbl">Departments</div></div>
+            <div class="hero-stat"><div class="num">4</div><div class="lbl">Sub-Counties</div></div>
+            <div class="hero-stat"><div class="num">24/7</div><div class="lbl">Online Access</div></div>
+          </div>
+        </div>
+
+        <div class="section-header">
+          <div class="section-title">Departments</div>
+          <div class="section-link" onclick="showPage('services')">View all →</div>
+        </div>
+        <div class="dept-grid" id="homeDeptGrid"></div>
+
+        <div class="section-header">
+          <div class="section-title">Most Used Services</div>
+          <div class="section-link" onclick="showPage('services')">See all →</div>
+        </div>
+        <div class="quick-services" id="quickServices"></div>
+      </div>
+
+      <!-- ALL SERVICES -->
+      <div class="page-section" id="page-services">
+        <div class="section-header">
+          <div class="section-title">All Departments & Services</div>
+        </div>
+        <div class="dept-grid" id="allDeptGrid"></div>
+      </div>
+
+      <!-- DEPT DETAIL -->
+      <div class="page-section" id="page-dept">
+        <button class="back-btn" onclick="goBack()">← Back</button>
+        <div class="dept-detail-header" id="deptDetailHeader"></div>
+        <div class="services-table" id="deptServicesList"></div>
+      </div>
+
+      <!-- TRACK -->
+      <div class="page-section" id="page-track">
+        <div style="max-width:640px;">
+          <div class="section-header"><div class="section-title">Track Your Applications</div></div>
+          <div class="search-box" style="margin-bottom:20px;border-radius:var(--radius-sm);">
+            <span>🔍</span>
+            <input type="text" placeholder="Enter application ID (e.g. NYM-2025-0041)" style="background:none;border:none;outline:none;font-family:'Sora',sans-serif;font-size:13px;width:100%;">
+          </div>
+          <div class="tracker-grid" id="trackerList"></div>
+        </div>
+      </div>
+
+      <!-- PAY -->
+      <div class="page-section" id="page-pay">
+        <div class="section-header"><div class="section-title">Pay County Fees & Levies</div></div>
+        <div class="pay-grid">
+          <div class="pay-card">
+            <h3>📱 M-Pesa Payment</h3>
+            <p>Pay any county fee quickly using M-Pesa Paybill. Use your Application ID as the account number.</p>
+            <div class="paybill-box">
+              <div class="paybill-label">Paybill Number</div>
+              <div class="paybill-number">222 333</div>
+            </div>
+            <ol class="pay-steps">
+              <li class="pay-step"><span class="step-num">1</span> Go to M-Pesa → Lipa na M-Pesa → Pay Bill</li>
+              <li class="pay-step"><span class="step-num">2</span> Business No: <strong>222333</strong></li>
+              <li class="pay-step"><span class="step-num">3</span> Account No: Your Application ID</li>
+              <li class="pay-step"><span class="step-num">4</span> Enter amount & confirm with PIN</li>
+              <li class="pay-step"><span class="step-num">5</span> You will receive an SMS confirmation</li>
+            </ol>
+          </div>
+          <div class="pay-card">
+            <h3>💰 Fee Schedule</h3>
+            <p>Common county service fees for reference.</p>
+            <table class="fee-table">
+              <thead><tr><th>Service</th><th>Fee</th></tr></thead>
+              <tbody>
+                <tr><td>Single Business Permit (small)</td><td class="fee-amount">KES 1,500</td></tr>
+                <tr><td>Single Business Permit (medium)</td><td class="fee-amount">KES 3,000</td></tr>
+                <tr><td>Building Plan Approval</td><td class="fee-amount">From KES 5,000</td></tr>
+                <tr><td>Land Survey Request</td><td class="fee-amount">From KES 10,000</td></tr>
+                <tr><td>Market Stall (monthly)</td><td class="fee-amount">From KES 200</td></tr>
+                <tr><td>Cultural Event Permit</td><td class="fee-amount">KES 2,000</td></tr>
+                <tr><td>Sports Ground Booking</td><td class="fee-amount">From KES 500</td></tr>
+                <tr><td>Hawker License</td><td class="fee-amount">KES 1,000</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO -->
+      <div class="page-section" id="page-info">
+        <div class="section-header"><div class="section-title">About Nyamira County</div></div>
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>🏛️ County Overview</h3>
+            <div class="info-row"><span class="info-icon">📍</span><span class="info-label">Region</span><span class="info-value">Nyanza, Western Kenya</span></div>
+            <div class="info-row"><span class="info-icon">🏙️</span><span class="info-label">Headquarters</span><span class="info-value">Nyamira Town</span></div>
+            <div class="info-row"><span class="info-icon">🗺️</span><span class="info-label">Sub-Counties</span><span class="info-value">Nyamira North, South, Borabu, Manga</span></div>
+            <div class="info-row"><span class="info-icon">👥</span><span class="info-label">Population</span><span class="info-value">~650,000 residents</span></div>
+            <div class="info-row"><span class="info-icon">⛰️</span><span class="info-label">Altitude</span><span class="info-value">1,400 – 2,100m above sea level</span></div>
+            <div class="info-row"><span class="info-icon">🌿</span><span class="info-label">Main crop</span><span class="info-value">Tea, coffee, maize, bananas</span></div>
+            <div class="info-row"><span class="info-icon">👤</span><span class="info-label">People</span><span class="info-value">Abagusii (Gusii), Kipsigis</span></div>
+          </div>
+          <div class="info-card">
+            <h3>📞 Contact & Emergency</h3>
+            <div class="info-row"><span class="info-icon">📞</span><span class="info-label">County Hotline</span><span class="info-value">0800 720 000</span></div>
+            <div class="info-row"><span class="info-icon">✉️</span><span class="info-label">Email</span><span class="info-value">info@nyamira.go.ke</span></div>
+            <div class="info-row"><span class="info-icon">🌐</span><span class="info-label">Website</span><span class="info-value">nyamira.go.ke</span></div>
+            <div class="emergency-banner">
+              <strong>🚨 Emergency Numbers</strong>
+              <p>Ambulance: <strong>0800 720 555</strong><br>GBV Helpline: <strong>0800 720 999</strong><br>Police: <strong>999</strong> | Fire: <strong>0800 720 111</strong></p>
+            </div>
+            <div style="margin-top:14px;">
+              <button class="contact-btn" onclick="showDept('health')">🏥 Find nearest health facility →</button>
+              <button class="contact-btn" onclick="showPage('services')" style="margin-top:8px;">📋 Browse all services →</button>
+            </div>
+          </div>
+          <div class="info-card" style="grid-column:1/-1;">
+            <h3>🌍 For Tourists & Investors</h3>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:8px;">
+              <div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;">
+                <div style="font-size:22px;margin-bottom:8px;">🍵</div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Tea Country</div>
+                <div style="font-size:12px;color:var(--text-muted);">One of Kenya's top tea-producing counties. Invest in tea estates, processing & export.</div>
+              </div>
+              <div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;">
+                <div style="font-size:22px;margin-bottom:8px;">🌄</div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Highland Tourism</div>
+                <div style="font-size:12px;color:var(--text-muted);">Scenic highlands, forests, rivers & cultural heritage. Eco-tourism investment opportunities.</div>
+              </div>
+              <div style="background:var(--bg);border-radius:var(--radius-sm);padding:16px;">
+                <div style="font-size:22px;margin-bottom:8px;">🐄</div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Dairy & Livestock</div>
+                <div style="font-size:12px;color:var(--text-muted);">Strong dairy farming base. Opportunities in milk processing, cold chains & cooperatives.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /page-content -->
+  </div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- Apply Modal -->
+<div class="modal-backdrop" id="applyModal">
+  <div class="modal">
+    <div id="modalFormContent">
+      <h2 id="modalServiceName">Apply for Service</h2>
+      <div class="modal-dept" id="modalDeptName"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-input" placeholder="Your full name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">ID / Passport Number</label>
+          <input type="text" class="form-input" placeholder="National ID">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Phone Number</label>
+          <input type="tel" class="form-input" placeholder="07XX XXX XXX">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sub-County</label>
+          <select class="form-input">
+            <option>Select sub-county</option>
+            <option>Nyamira North</option>
+            <option>Nyamira South</option>
+            <option>Borabu</option>
+            <option>Manga</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ward</label>
+        <input type="text" class="form-input" placeholder="Your ward name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Additional Details</label>
+        <textarea class="form-input" rows="3" placeholder="Any extra information relevant to your application..." style="resize:vertical;"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="btn-submit" onclick="submitApplication()">Submit Application</button>
+      </div>
+    </div>
+    <div class="success-msg" id="successMsg">
+      <div class="check">✅</div>
+      <h3>Application Submitted!</h3>
+      <p>Your application has been received by Nyamira County Government.</p>
+      <div class="ref-box" id="refNumber">NYM-2025-XXXX</div>
+      <p style="font-size:12px;color:var(--text-muted);">Save this reference number. You will receive an SMS confirmation shortly. Track your application in the <strong>Track</strong> section.</p>
+      <button class="btn-primary" style="margin-top:20px;" onclick="closeModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const depts = [
+  { id:"health", name:"Health Services", swahili:"Huduma za Afya", icon:"🏥", color:"#c0392b", bg:"#fdf0ef", count:14,
+    services:[
+      {name:"County Referral Hospital",swahili:"Hospitali ya Rufaa",desc:"Inpatient & outpatient services at Nyamira CRH",fee:"NHIF / Subsidized",online:false,phone:"0720 000 001"},
+      {name:"Ambulance Services",swahili:"Huduma za Ambulensi",desc:"Emergency medical transport 24/7 countywide",fee:"Free",online:false,phone:"0800 720 555"},
+      {name:"Immunization Services",swahili:"Chanjo",desc:"Child & adult vaccines at all health centres",fee:"Free",online:true},
+      {name:"MCH Clinic",swahili:"Kliniki ya Mama na Mtoto",desc:"Antenatal, postnatal & maternal health services",fee:"Free for mothers",online:true},
+      {name:"HIV Testing & Treatment",swahili:"Upimaji wa VVU",desc:"Confidential testing, ARVs & counselling",fee:"Free",online:false},
+      {name:"Community Health Units",swahili:"Vitengo vya Afya ya Jamii",desc:"Home visits, outreach programs & health education",fee:"Free",online:false},
+      {name:"Mental Health Services",swahili:"Afya ya Akili",desc:"Counselling & psychiatric support",fee:"Subsidized",online:true},
+      {name:"TB Testing & Treatment",swahili:"Kifua Kikuu",desc:"Free diagnosis and treatment of tuberculosis",fee:"Free",online:false},
+    ]
+  },
+  { id:"trade", name:"Trade & Business", swahili:"Biashara na Viwanda", icon:"🏪", color:"#d4a017", bg:"#fdf8e7", count:8,
+    services:[
+      {name:"Single Business Permit",swahili:"Leseni ya Biashara",desc:"Annual operating license for all businesses in the county",fee:"From KES 1,500/yr",online:true},
+      {name:"Weights & Measures Certification",swahili:"Uthibitisho wa Vipimo",desc:"Calibration, certification & consumer protection enforcement",fee:"KES 500/inspection",online:false},
+      {name:"Market Stall Allocation",swahili:"Ugawaji wa Stendi",desc:"Apply for a market stall in any county market",fee:"From KES 200/month",online:true},
+      {name:"Hawker License",swahili:"Leseni ya Muuza Mitaani",desc:"License for mobile & street trading",fee:"KES 1,000/yr",online:true},
+      {name:"SME Business Support",swahili:"Msaada kwa Biashara Ndogo",desc:"Free mentorship, training & funding guidance for SMEs",fee:"Free",online:true},
+      {name:"Consumer Protection Complaints",swahili:"Malalamiko ya Watumiaji",desc:"File complaints about unfair trade practices",fee:"Free",online:true},
+    ]
+  },
+  { id:"agriculture", name:"Agriculture & Livestock", swahili:"Kilimo na Mifugo", icon:"🌿", color:"#1a6b3c", bg:"#eaf7f0", count:10,
+    services:[
+      {name:"Farm Extension Services",swahili:"Huduma za Ugani",desc:"Agronomist visits, demo farms & crop advisory",fee:"Free",online:true},
+      {name:"Veterinary Services",swahili:"Huduma za Mifugo",desc:"Animal disease control, treatment & vaccinations",fee:"Subsidized",online:true},
+      {name:"Soil Testing",swahili:"Upimaji wa Udongo",desc:"Free soil analysis to guide fertilizer use",fee:"Free",online:true},
+      {name:"Tea Development Program",swahili:"Programu ya Chai",desc:"Support for tea farmers, factories & cooperatives",fee:"Free",online:true},
+      {name:"Irrigation Support",swahili:"Msaada wa Umwagiliaji",desc:"Technical and material support for small-scale irrigation",fee:"Subsidized",online:false},
+      {name:"Artificial Insemination",swahili:"AI ya Mifugo",desc:"Livestock AI services for dairy improvement",fee:"KES 500/service",online:true},
+      {name:"Crop Insurance Advisory",swahili:"Bima ya Mazao",desc:"Guidance on subsidized crop & livestock insurance",fee:"Free",online:true},
+    ]
+  },
+  { id:"water", name:"Water & Environment", swahili:"Maji na Mazingira", icon:"💧", color:"#0f6e56", bg:"#e2f5ef", count:7,
+    services:[
+      {name:"Water Connection Application",swahili:"Ombi la Maji",desc:"Apply for rural or urban water supply connection",fee:"From KES 3,000",online:true},
+      {name:"Borehole Drilling Request",swahili:"Kuchimba Kisima",desc:"Request borehole siting, drilling & casing support",fee:"Varies by location",online:true},
+      {name:"Sanitation & Sewerage Services",swahili:"Usafi wa Mazingira",desc:"Sewerage connections & pit latrine support",fee:"Subsidized",online:false},
+      {name:"Environmental Impact Assessment",swahili:"Tathmini ya Mazingira",desc:"EIA approvals required for development projects",fee:"From KES 10,000",online:true},
+      {name:"Tree Planting Program",swahili:"Upanzi wa Miti",desc:"Free seedlings & technical support for reforestation",fee:"Free",online:true},
+      {name:"Solid Waste Management",swahili:"Usimamizi wa Taka",desc:"Garbage collection & waste disposal services",fee:"Varies by zone",online:false},
+    ]
+  },
+  { id:"lands", name:"Lands & Planning", swahili:"Ardhi na Mipango", icon:"🗺️", color:"#7d5a1e", bg:"#fdf5e4", count:6,
+    services:[
+      {name:"Building Plan Approval",swahili:"Idhini ya Ujenzi",desc:"Submit and track construction permit applications",fee:"From KES 5,000",online:true},
+      {name:"Land Survey Request",swahili:"Upimaji wa Ardhi",desc:"Official surveying, boundary marking & title deed",fee:"From KES 10,000",online:true},
+      {name:"Land Rates Payment",swahili:"Kodi ya Ardhi",desc:"Pay annual land rates online via M-Pesa or bank",fee:"Varies by plot",online:true},
+      {name:"Change of Land Use",swahili:"Mabadiliko ya Matumizi ya Ardhi",desc:"Apply to change land use classification",fee:"KES 8,000",online:true},
+      {name:"Subdivision Approval",swahili:"Ugawaji wa Ardhi",desc:"Official approval for subdivision of land parcels",fee:"From KES 15,000",online:false},
+      {name:"Physical Development Plan",swahili:"Mpango wa Maendeleo ya Kimwili",desc:"Request a copy of the county physical development plan",fee:"KES 500",online:true},
+    ]
+  },
+  { id:"education", name:"Education & ECDE", swahili:"Elimu na ECDE", icon:"📚", color:"#185fa5", bg:"#e8f2fc", count:5,
+    services:[
+      {name:"County Bursary Application",swahili:"Ombi la Bursari",desc:"Apply for county bursary for secondary & tertiary students",fee:"Free to apply",online:true},
+      {name:"ECDE Enrolment",swahili:"Usajili wa ECDE",desc:"Enrol children in Early Childhood Development Centres",fee:"Subsidized",online:true},
+      {name:"Youth Polytechnic Admission",swahili:"Usajili wa Politekniki",desc:"Apply for vocational training at county polytechnics",fee:"Varies by course",online:true},
+      {name:"School Infrastructure Request",swahili:"Miundombinu ya Shule",desc:"Request repairs or improvements at public schools",fee:"Free",online:true},
+      {name:"Teacher Advisory Services",swahili:"Ushauri kwa Walimu",desc:"Professional development & advisory for teachers",fee:"Free",online:false},
+    ]
+  },
+  { id:"social", name:"Social Services", swahili:"Huduma za Jamii", icon:"🤝", color:"#5b4fcf", bg:"#f0eeff", count:8,
+    services:[
+      {name:"PWD Support Registration",swahili:"Usajili wa Walemavu",desc:"Register for disability support, grants & assistive devices",fee:"Free",online:true},
+      {name:"Women Empowerment Fund",swahili:"Mfuko wa Wanawake",desc:"Grants, training and mentorship for women's groups",fee:"Free to apply",online:true},
+      {name:"Youth Empowerment Program",swahili:"Programu ya Vijana",desc:"Youth grants, sports programs & skills development",fee:"Free to apply",online:true},
+      {name:"OVC Support",swahili:"Msaada wa Watoto Yatima",desc:"Support programs for orphans & vulnerable children",fee:"Free",online:false},
+      {name:"GBV Response Services",swahili:"Huduma za GBV",desc:"Gender-based violence reporting, support & safe houses",fee:"Free",phone:"0800 720 999",online:false},
+      {name:"Senior Citizen Support",swahili:"Msaada wa Wazee",desc:"Welfare & social protection programs for the elderly",fee:"Free",online:false},
+      {name:"Cash Transfer Program",swahili:"Mpango wa Pesa Taslimu",desc:"Welfare cash transfers for the most vulnerable households",fee:"Free",online:false},
+    ]
+  },
+  { id:"finance", name:"Finance & Revenue", swahili:"Fedha na Mapato", icon:"💰", color:"#2d6a2d", bg:"#edf7ed", count:6,
+    services:[
+      {name:"Land Rates Payment",swahili:"Kodi ya Ardhi",desc:"Pay annual land rates via M-Pesa Paybill 222333",fee:"Varies",online:true},
+      {name:"Business Permit Renewal",swahili:"Upya wa Leseni",desc:"Renew your annual single business permit online",fee:"From KES 1,500",online:true},
+      {name:"Agricultural Cess Payment",swahili:"Ushuru wa Kilimo",desc:"Pay produce cess for tea, coffee & other crops",fee:"Per tonnage",online:true},
+      {name:"Market Fees Payment",swahili:"Ada za Soko",desc:"Pay daily or monthly market user fees",fee:"From KES 50/day",online:true},
+      {name:"Advertisement Levy",swahili:"Ushuru wa Matangazo",desc:"Pay levy for outdoor advertising and billboards",fee:"Varies by size",online:true},
+    ]
+  },
+  { id:"roads", name:"Roads & Infrastructure", swahili:"Barabara na Miundombinu", icon:"🛣️", color:"#534ab7", bg:"#eeecfd", count:5,
+    services:[
+      {name:"Road Repair Request",swahili:"Ombi la Matengenezo ya Barabara",desc:"Report and request repair of county roads & potholes",fee:"Free",online:true},
+      {name:"Street Light Request",swahili:"Ombi la Taa za Barabara",desc:"Request installation of street lighting in your area",fee:"Free",online:true},
+      {name:"Market Construction Request",swahili:"Ombi la Ujenzi wa Soko",desc:"Request construction or improvement of public markets",fee:"Free to apply",online:true},
+      {name:"Bridge & Culvert Request",swahili:"Ombi la Daraja",desc:"Request construction of bridges or culverts",fee:"Free",online:true},
+    ]
+  },
+  { id:"ict", name:"ICT Services", swahili:"Huduma za TEHAMA", icon:"💻", color:"#0e7490", bg:"#e0f6fb", count:4,
+    services:[
+      {name:"Huduma Centre Services",swahili:"Huduma za Kituo cha Huduma",desc:"One-stop service delivery points across the county",fee:"Varies",online:false},
+      {name:"Digital Literacy Training",swahili:"Mafunzo ya Dijitali",desc:"Free computer & internet skills training at ICT centres",fee:"Free",online:true},
+      {name:"County Data Request",swahili:"Ombi la Data",desc:"Request official county statistics & data sets",fee:"Free",online:true},
+    ]
+  },
+  { id:"culture", name:"Culture, Sports & Tourism", swahili:"Utamaduni, Michezo na Utalii", icon:"🏆", color:"#b45309", bg:"#fef3e2", count:4,
+    services:[
+      {name:"Sports Ground Booking",swahili:"Uhifadhi wa Uwanja",desc:"Book county sports facilities and playing grounds",fee:"From KES 500",online:true},
+      {name:"Tourism Information",swahili:"Taarifa za Utalii",desc:"Visitor guide, attractions, investment opportunities",fee:"Free",online:true},
+      {name:"Cultural Event Permit",swahili:"Kibali cha Tukio",desc:"Apply for permit to host public cultural events",fee:"KES 2,000",online:true},
+    ]
+  },
+  { id:"admin", name:"Public Administration", swahili:"Utawala wa Umma", icon:"🏛️", color:"#374151", bg:"#f3f4f6", count:5,
+    services:[
+      {name:"Civil Registration",swahili:"Usajili wa Raia",desc:"Birth, death & marriage certificate registration",fee:"Free",online:false},
+      {name:"Public Participation",swahili:"Ushiriki wa Umma",desc:"Register for county public participation forums",fee:"Free",online:true},
+      {name:"County Assembly Petition",swahili:"Malalamiko ya Bunge la Kaunti",desc:"Submit petitions to the County Assembly of Nyamira",fee:"Free",online:true},
+      {name:"Ward Development Fund Request",swahili:"Ombi la Mfuko wa Ward",desc:"Apply for ward development fund support",fee:"Free",online:true},
+    ]
+  },
+];
+
+const quickServices = [
+  {name:"Single Business Permit", swahili:"Leseni ya Biashara", dept:"Trade & Business", color:"#d4a017", badge:"Online", badgeClass:"badge-green"},
+  {name:"County Bursary Application", swahili:"Ombi la Bursari", dept:"Education", color:"#185fa5", badge:"Open Now", badgeClass:"badge-gold"},
+  {name:"Building Plan Approval", swahili:"Idhini ya Ujenzi", dept:"Lands & Planning", color:"#7d5a1e", badge:"Apply", badgeClass:"badge-blue"},
+  {name:"Farm Extension Services", swahili:"Huduma za Ugani", dept:"Agriculture", color:"#1a6b3c", badge:"Free", badgeClass:"badge-green"},
+  {name:"Water Connection Application", swahili:"Ombi la Maji", dept:"Water & Environment", color:"#0f6e56", badge:"Online", badgeClass:"badge-green"},
+  {name:"PWD Support Registration", swahili:"Usajili wa Walemavu", dept:"Social Services", color:"#5b4fcf", badge:"Free", badgeClass:"badge-green"},
+];
+
+const trackItems = [
+  {id:"NYM-2025-0041",name:"Single Business Permit",dept:"Trade & Business",status:"In Review",statusClass:"status-review",progress:60,steps:["Submitted","In Review","Approved","Issued"]},
+  {id:"NYM-2025-0038",name:"County Bursary 2025/26",dept:"Education",status:"Approved",statusClass:"status-approved",progress:100,steps:["Submitted","Verified","Approved","Disbursed"]},
+  {id:"NYM-2025-0029",name:"Building Plan Approval",dept:"Lands & Planning",status:"Processing",statusClass:"status-processing",progress:35,steps:["Submitted","Processing","Inspected","Approved"]},
+];
+
+let lang = 'en';
+let prevPage = 'home';
+let currentPage = 'home';
+let currentDept = null;
+let currentModalService = '';
+
+function t(en, sw) { return lang === 'sw' ? sw : en; }
+
+function setLang(l, btn) {
+  lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAll();
+}
+
+function renderAll() {
+  renderDeptGrid('homeDeptGrid', true);
+  renderDeptGrid('allDeptGrid', false);
+  renderQuickServices();
+  renderTracker();
+  if (currentDept) renderDeptDetail(currentDept);
+}
+
+function renderDeptGrid(targetId, limit) {
+  const el = document.getElementById(targetId);
+  const list = limit ? depts.slice(0, 8) : depts;
+  el.innerHTML = list.map(d => `
+    <div class="dept-card" onclick="showDept('${d.id}')">
+      <div class="dept-emoji">${d.icon}</div>
+      <div class="dept-name">${t(d.name, d.swahili)}</div>
+      <div class="dept-count">${d.count} services</div>
+    </div>
+  `).join('');
+}
+
+function renderQuickServices() {
+  const el = document.getElementById('quickServices');
+  el.innerHTML = quickServices.map(s => `
+    <div class="service-chip" onclick="openApplyModal('${s.name}', '${s.dept}')">
+      <div class="chip-dot" style="background:${s.color}"></div>
+      <div class="chip-info">
+        <div class="chip-name">${t(s.name, s.swahili)}</div>
+        <div class="chip-dept">${s.dept}</div>
+      </div>
+      <span class="chip-badge ${s.badgeClass}">${s.badge}</span>
+    </div>
+  `).join('');
+}
+
+function renderTracker() {
+  const el = document.getElementById('trackerList');
+  el.innerHTML = trackItems.map(item => {
+    const stepsDone = Math.ceil((item.progress / 100) * item.steps.length);
+    return `
+      <div class="track-card">
+        <div class="track-top">
+          <div>
+            <div class="track-id">${item.id}</div>
+            <div class="track-name">${item.name}</div>
+            <div class="track-dept">${item.dept}</div>
+          </div>
+          <span class="status-pill ${item.statusClass}">${item.status}</span>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-bar"><div class="progress-fill" style="width:${item.progress}%"></div></div>
+          <div class="progress-steps">
+            ${item.steps.map((s,i) => `<span class="progress-step ${i < stepsDone ? 'done' : ''}">${s}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function renderDeptDetail(id) {
+  const dept = depts.find(d => d.id === id);
+  if (!dept) return;
+  document.getElementById('deptDetailHeader').innerHTML = `
+    <div class="dept-detail-icon" style="background:${dept.bg}">${dept.icon}</div>
+    <div>
+      <div class="dept-detail-title">${t(dept.name, dept.swahili)}</div>
+      <div class="dept-detail-sub">${dept.services.length} services available</div>
+    </div>
+  `;
+  document.getElementById('deptServicesList').innerHTML = dept.services.map(s => `
+    <div class="service-row">
+      <div class="service-row-icon" style="background:${dept.bg}">${dept.icon}</div>
+      <div class="service-row-info">
+        <div class="service-row-name">${t(s.name, s.swahili)}</div>
+        <div class="service-row-desc">${s.desc}</div>
+        <div class="service-row-fee">${s.fee}${s.phone ? ' · 📞 '+s.phone : ''}</div>
+      </div>
+      <div class="service-row-actions">
+        <span class="${s.online ? 'online-pill' : 'offline-pill'}">${s.online ? 'Online' : 'In Person'}</span>
+        ${s.online ? `<button class="apply-row-btn" onclick="openApplyModal('${s.name.replace(/'/g,"\\'")}', '${dept.name}')">Apply</button>` : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+function showPage(name) {
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-' + name);
+  if (page) page.classList.add('active');
+  const titles = {home:'Home',services:'All Services',track:'Track Application',pay:'Pay Fees',info:'About Nyamira'};
+  document.getElementById('topbarTitle').textContent = titles[name] || name;
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `showPage('${name}')`) n.classList.add('active');
+  });
+  prevPage = currentPage;
+  currentPage = name;
+  currentDept = null;
+  closeSidebar();
+}
+
+function showDept(id) {
+  prevPage = currentPage;
+  currentPage = 'dept';
+  currentDept = id;
+  document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-dept').classList.add('active');
+  const dept = depts.find(d => d.id === id);
+  document.getElementById('topbarTitle').textContent = dept ? dept.name : 'Department';
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick') === `showDept('${id}')`) n.classList.add('active');
+  });
+  renderDeptDetail(id);
+  closeSidebar();
+}
+
+function goBack() {
+  if (prevPage === 'dept') showPage('services');
+  else showPage(prevPage || 'home');
+}
+
+function handleSearch(val) {
+  if (!val.trim()) return;
+  for (const d of depts) {
+    const match = d.services.some(s => s.name.toLowerCase().includes(val.toLowerCase()));
+    if (match) { showDept(d.id); return; }
+  }
+}
+
+function openApplyModal(serviceName, deptName) {
+  currentModalService = serviceName;
+  document.getElementById('modalServiceName').textContent = 'Apply for: ' + serviceName;
+  document.getElementById('modalDeptName').textContent = deptName + ' Department';
+  document.getElementById('modalFormContent').style.display = 'block';
+  document.getElementById('successMsg').style.display = 'none';
+  document.getElementById('applyModal').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('applyModal').classList.remove('open');
+}
+
+function submitApplication() {
+  const ref = 'NYM-2025-' + String(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('refNumber').textContent = ref;
+  document.getElementById('modalFormContent').style.display = 'none';
+  document.getElementById('successMsg').style.display = 'block';
+}
+
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('mobileOverlay').classList.toggle('open');
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('mobileOverlay').classList.remove('open');
+}
+
+document.getElementById('applyModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+renderAll();
+</script>
+</body>
+</html>
